@@ -91,8 +91,8 @@ stemmer = StemmerFactory().create_stemmer()
 
 print("Memuat model Word2Vec (mungkin perlu beberapa saat)...")
 # Ganti path ini sesuai dengan lokasi model Anda
-# model_path_gensim = r'C:\SKRIPSI (code)\models\cc.id.300.model' 
-model_path_gensim = r'C:\SKRIPSI (code)\models\cc.en.300.model' 
+model_path_gensim = r'C:\SKRIPSI (code)\models\cc.id.300.model' 
+# model_path_gensim = r'C:\SKRIPSI (code)\models\cc.en.300.model' 
 model_path_vec = 'cc.id.300.vec' # Pastikan file .vec ada di folder yang sama
 
 w2v_model = None

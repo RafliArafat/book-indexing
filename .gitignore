@@ -1,0 +1,31 @@
+# Environment
+.env
+.env.local
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+build/
+
+# Flask
+instance/
+.webassets-cache
+flask_session/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project specific
+uploads/
+results/
+models/
+*.log
+
+# Cache
+*.cache
+.pytest_cache/

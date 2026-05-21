@@ -93,7 +93,7 @@ print("Memuat model FastText (mungkin perlu beberapa saat)...")
 # Download dari: https://fasttext.cc/docs/en/crawl-vectors.html
 # Untuk bahasa Inggris: cc.en.300.bin
 # Untuk bahasa Indonesia: cc.id.300.bin
-model_path_fasttext = r'C:\SKRIPSI (code)\models\cc.id.300.bin'
+model_path_fasttext = r'C:\SKRIPSI (code)\models\cc.en.300.'
 
 ft_model = None
 try:
@@ -623,11 +623,11 @@ def build_page_map(valid_phrases, page_texts, threshold=0.8):
     """
     page_map = defaultdict(list)
     for phrase in valid_phrases:
-        phrase_tokens = tokenize3(phrase)
+        phrase_tokens = tokenize2(phrase)
         if not phrase_tokens: 
             continue
         for page_num, page_txt in page_texts:
-            page_tokens = tokenize3(page_txt)
+            page_tokens = tokenize2(page_txt)
             overlap = len(phrase_tokens & page_tokens) / len(phrase_tokens)
             if overlap >= threshold:
                 page_map[phrase].append(page_num)
@@ -1239,7 +1239,7 @@ def upload_file():
                 all_text, 
                 page_texts, 
                 dynamic_stopwords, 
-                top_per_n=300
+                top_per_n=370
             )
             
             print(f"Keyword hasil YAKE: {len(keyphrases)}")

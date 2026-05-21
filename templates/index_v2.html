@@ -424,7 +424,7 @@
         <div class="form-group">
           <label for="book_summary">Ringkasan/Abstrak Buku (Wajib) *</label>
           <textarea id="book_summary" name="book_summary" rows="5" 
-                    placeholder="Masukkan ringkasan atau abstrak buku (minimal 200 karakter). Ringkasan ini akan digunakan sebagai konteks untuk memfilter kata kunci yang relevan." 
+                    placeholder="Masukkan ringkasan atau abstrak buku (minimal 50 karakter). Ringkasan ini akan digunakan sebagai konteks untuk memfilter kata kunci yang relevan." 
                     required>{{ book_summary or '' }}</textarea>
           <small style="color: #777;">Ringkasan yang baik akan meningkatkan akurasi hasil indeks.</small>
         </div>
@@ -441,7 +441,7 @@
           <small style="color: #777;">Kata-kata ini akan diabaikan saat ekstraksi kata kunci.</small>
         </div>
         
-        <button type="submit" onclick="showLoading()">Buat Indeks</button>
+        <button type="submit" onclick="showLoading()">🚀 Buat Indeks</button>
       </form>
       <div id="loading-indicator" class="loading">
         <p><strong>⏳ Memproses...</strong> Mohon tunggu beberapa menit tergantung ukuran buku.</p>

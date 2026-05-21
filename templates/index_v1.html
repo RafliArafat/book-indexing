@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistem Indeks Buku Otomatis</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --primary-hover: #0056b3;
+      --success-color: #28a745;
+      --success-hover: #218838;
+      --danger-color: #dc3545;
+      --light-gray: #f5f7fa;
+      --border-color: #e0e0e0;
+    }
+  
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background-color: var(--light-gray);
+      margin: 0;
+      padding: 40px 15px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 35px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #333;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 30px;
+    }
+
+    .form-section,
+    .result-section,
+    .eval-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      background: #fafafa;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="file"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 15px;
+    }
+    
+    input#modal-pages {
+        background-color: #f4f4f4;
+    }
+    input#modal-pages:not(:disabled) {
+        background-color: #fff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button,
+    .btn {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 22px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn.btn-small {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+    
+    .btn.btn-outline {
+        background-color: #fff;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+    }
+    .btn.btn-outline:hover {
+        background-color: #f8f9fa;
+    }
+
+    button:hover, .btn:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .btn-success { background-color: var(--success-color); }
+    .btn-success:hover { background-color: var(--success-hover); }
+    
+    .btn-danger { background-color: var(--danger-color); }
+    .btn-danger:hover { background-color: #c82333; }
+    
+    .btn-secondary { background-color: #6c757d; }
+    .btn-secondary:hover { background-color: #5a6268; }
+
+    .clear-link {
+      float: right;
+      color: var(--danger-color);
+      text-decoration: none;
+      font-size: 0.95em;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 15px;
+      font-size: 1.1em;
+      color: var(--primary-color);
+    }
+
+    .download-link {
+      background-color: var(--success-color);
+      padding: 10px 18px;
+      margin-bottom: 15px;
+    }
+    .download-link:hover {
+      background-color: var(--success-hover);
+    }
+
+    .results-search input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .search-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+      align-items: center;
+      justify-content: space-between; /* Memisahkan tombol filter dan bulk actions */
+    }
+    
+    .filter-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    /* Styling untuk Checkbox dan Bulk Actions */
+    .bulk-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .check-item {
+        width: 18px;
+        height: 18px;
+        margin-right: 12px;
+        cursor: pointer;
+        accent-color: var(--primary-color);
+    }
+
+    #btnAddIndex {
+      background-color: var(--success-color);
+    }
+    #btnAddIndex:hover {
+      background-color: var(--success-hover);
+    }
+
+    .results-list {
+      list-style-type: none;
+      padding: 0;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      background: #fff;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    
+    .results-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #f2f2f2;
+    }
+    
+    .results-list li.no-results-server,
+    .results-list li.not-found {
+        display: block;
+        color: #777;
+        text-align: center;
+    }
+
+    .results-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .results-list .index-content {
+        flex-grow: 1;
+        overflow: hidden;
+        display: flex;
+        align-items: center; /* Agar checkbox sejajar dengan teks */
+    }
+
+    .results-list .phrase {
+      font-weight: 500;
+      margin-right: 15px;
+    }
+
+    .results-list .pages {
+      color: #777;
+      font-size: 0.9em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 250px;
+      display: inline-block;
+      vertical-align: middle;
+      cursor: help;
+    }
+
+    .results-list .actions {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .actions .btn-action {
+        font-size: 13px;
+        padding: 4px 8px;
+        margin-left: 5px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background: #f7f7f7;
+        color: #333;
+    }
+    .actions .btn-action:hover {
+        background: #e0e0e0;
+        border-color: #aaa;
+    }
+    .actions .btn-delete {
+        background: #ffebee;
+        border-color: var(--danger-color);
+        color: var(--danger-color);
+    }
+    .actions .btn-delete:hover {
+        background: #f8d7da;
+    }
+
+    /* === STYLING MODAL === */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: auto;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+    }
+
+    .modal-close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        position: absolute;
+        top: 10px;
+        right: 20px;
+    }
+    .modal-close:hover,
+    .modal-close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .modal-content h3 {
+        margin-top: 0;
+        color: var(--primary-color);
+    }
+    
+    .modal-footer {
+        text-align: right;
+        margin-top: 25px;
+    }
+    .modal-footer .btn {
+        margin-left: 10px;
+    }
+    
+    .search-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .search-group input {
+        flex-grow: 1; 
+    }
+    .search-group button {
+        flex-shrink: 0; 
+    }
+    
+    #modal-loading {
+        display: none;
+        margin-left: 10px;
+        font-style: italic;
+        color: #555;
+    }
+
+    .eval-results {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      background: #f9fafb;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #eee;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sistem Indeks Buku Otomatis</h1>
+    <a href="/clear" class="clear-link">Mulai Ulang Sesi</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="form-section">
+      <h2>1. Buat Indeks Buku</h2>
+      <form id="upload-form" action="/" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="book_title">Judul Buku (Wajib)</label>
+          <input type="text" id="book_title" name="book_title" value="{{ book_title or '' }}" required />
+        </div>
+        <div class="form-group">
+          <label for="file_buku">File Buku (PDF)</label>
+          <input type="file" id="file_buku" name="file_buku" accept=".pdf" required />
+        </div>
+        <div class="form-group">
+          <label for="extra_stopwords">Stopwords Tambahan (Pisahkan dengan koma)</label>
+          <textarea id="extra_stopwords" name="extra_stopwords" placeholder="contoh: modul, ajar, spk"></textarea>
+        </div>
+        <button type="submit" onclick="showLoading()">Buat Indeks</button>
+      </form>
+      <div id="loading-indicator" class="loading">
+        <p><strong>Memproses...</strong> Mohon tunggu beberapa menit tergantung ukuran buku.</p>
+      </div>
+    </div>
+
+    {% if results %}
+    <div class="result-section">
+      <h2>2. Hasil Indeks untuk "{{ book_title }}"</h2>
+      <a href="/download/{{ download_file }}" class="download-link btn">📄 Unduh Semua (Full PDF)</a>
+
+      <div class="results-search">
+        <input type="text" id="searchInput" placeholder="🔍 Cari frasa di hasil indeks..." />
+        
+        <div class="search-controls">
+            <div class="filter-group">
+                <select id="sortSelect">
+                    <option value="asc">Urutkan A–Z</option>
+                    <option value="desc">Urutkan Z–A</option>
+                </select>
+                <button type="button" id="btnAddIndex" class="btn btn-small">Tambah Indeks</button>
+            </div>
+
+            <div class="bulk-actions">
+                <button type="button" id="btnBulkDelete" class="btn btn-danger btn-small">Hapus Terpilih</button>
+                <button type="button" id="btnBulkDownload" class="btn btn-success btn-small">Download Terpilih</button>
+            </div>
+        </div>
+      </div>
+
+      <ul class="results-list" id="resultsList">
+        {% for phrase, pages in results.items() %}
+        <li>
+          <div class="index-content">
+            <input type="checkbox" class="check-item" />
+            
+            <span class="phrase">{{ phrase }}</span>
+            <span class="pages" title="Halaman: {{ pages | join(', ') }}">
+              hlm. {{ pages | join(', ') }}
+            </span>
+          </div>
+          <div class="actions">
+            <button class="btn-action btn-edit">Edit</button>
+            <button class="btn-action btn-delete">Hapus</button>
+          </div>
+        </li>
+        {% else %}
+        <li class="no-results-server">Tidak ada frasa yang ditemukan.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="form-section eval-section">
+      <h2>3. Evaluasi F1-Score (Opsional)</h2>
+      <p>Upload file PDF "Ground Truth" (indeks yang sudah jadi) untuk membandingkan hasil otomatis.</p>
+      <form action="/evaluasi" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="file_gt">File Ground Truth (PDF)</label>
+          <input type="file" id="file_gt" name="file_gt" accept=".pdf" required />
+        </div>
+        <button type="submit">Jalankan Evaluasi</button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if eval_results %}
+    <div class="eval-section">
+      <h2>Hasil Evaluasi</h2>
+      <div class="eval-results">
+        <p><strong>Precision:</strong> {{ eval_results.precision }}</p>
+        <p><strong>Recall:</strong> {{ eval_results.recall }}</p>
+        <p><strong>F1-Score:</strong> {{ eval_results.f1_score }}</p>
+        <p><strong>Hybrid Similarity:</strong> {{ eval_results.hybrid_similarity }}</p>
+
+        <h3>True Positives ({{ eval_results.true_positives | length }})</h3>
+        <pre>{{ eval_results.true_positives | join('\n') }}</pre>
+
+        <h3>False Positives ({{ eval_results.false_positives | length }})</h3>
+        <pre>{{ eval_results.false_positives | join('\n') }}</pre>
+
+        <h3>False Negatives ({{ eval_results.false_negatives | length }})</h3>
+        <pre>{{ eval_results.false_negatives | join('\n') }}</pre>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div id="indexModal" class="modal-overlay">
+    <div class="modal-content">
+      <span class="modal-close" id="modalCloseBtn">&times;</span>
+      <h3 id="modal-title">Edit Indeks</h3>
+      
+      <form id="modal-form">
+        <div class="form-group">
+          <label for="modal-phrase">Frasa (Indeks)</label>
+          <div class="search-group">
+            <input type="text" id="modal-phrase" name="phrase" required />
+            <button type="button" id="modal-search-phrase" class="btn btn-small btn-outline">Cari</button>
+          </div>
+          <span id="modal-loading">Mencari...</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="modal-pages">Halaman (pisahkan dengan koma)</label>
+          <input type="text" id="modal-pages" name="pages" />
+          <small style="color: #777;">Anda dapat mengedit manual atau menggunakan tombol 'Cari' di atas.</small>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" id="modal-cancel" class="btn btn-secondary">Batal</button>
+          <button type="submit" id="modal-save" class="btn btn-success">Simpan</button>
+        </div>
+      </form>
+      
+    </div>
+  </div>
+
+
+  <script>
+    function showLoading() {
+      var title = document.getElementById("book_title").value.trim();
+      var file = document.getElementById("file_buku").value.trim();
+      if (!title || !file) return;
+      document.getElementById("loading-indicator").style.display = "block";
+    }
+
+    // Cek apakah bagian hasil ada di halaman
+    if (document.getElementById("resultsList")) {
+    
+      // --- Elemen Global ---
+      const searchInput = document.getElementById("searchInput");
+      const sortSelect = document.getElementById("sortSelect");
+      const resultsList = document.getElementById("resultsList");
+      const btnAddIndex = document.getElementById("btnAddIndex");
+      
+      // --- Elemen Bulk Actions ---
+      const btnBulkDelete = document.getElementById("btnBulkDelete");
+      const btnBulkDownload = document.getElementById("btnBulkDownload");
+
+      // --- Elemen Modal ---
+      const modalOverlay = document.getElementById("indexModal");
+      const modalTitle = document.getElementById("modal-title");
+      const modalForm = document.getElementById("modal-form");
+      const modalPhraseInput = document.getElementById("modal-phrase");
+      const modalPagesInput = document.getElementById("modal-pages");
+      const modalCloseBtn = document.getElementById("modalCloseBtn");
+      const modalCancelBtn = document.getElementById("modal-cancel");
+      const modalSearchBtn = document.getElementById("modal-search-phrase");
+      const modalLoading = document.getElementById("modal-loading");
+
+
+      // --- Cache & State ---
+      let allItems = [];
+      let nextId = 0; // Untuk ID unik item baru
+
+      // --- Helper: Ambil item yang dicentang ---
+      function getCheckedItems() {
+        // Kita mencari checkbox yang 'checked' di dalam list, 
+        // kemudian mengambil elemen <li> pembungkusnya.
+        return Array.from(resultsList.querySelectorAll('.check-item:checked')).map(cb => cb.closest('li'));
+      }
+
+      // --- Fungsi Inisialisasi ---
+      function initializeItems() {
+        const initialItems = Array.from(resultsList.querySelectorAll("li:not(.no-results-server)"));
+        allItems = initialItems.map(li => {
+            const id = nextId++;
+            li.dataset.id = id;
+            
+            // Simpan data halaman lengkap untuk edit
+            const pagesSpan = li.querySelector('.pages');
+            const fullPages = pagesSpan.getAttribute('title').replace('Halaman: ', '');
+            li.dataset.fullPages = fullPages;
+            
+            return li;
+        });
+      }
+      
+      // --- Fungsi Filter & Render ---
+      function filterAndSort() {
+        if (!resultsList) return; 
+        
+        const query = searchInput.value.toLowerCase();
+        const sortOrder = sortSelect.value;
+        
+        // 1. FILTER: Selalu filter dari cache 'allItems'
+        const filtered = allItems.filter(li =>
+          li.querySelector(".phrase").textContent.toLowerCase().includes(query)
+        );
+
+        // 2. SORT
+        filtered.sort((a, b) => {
+          const textA = a.querySelector(".phrase").textContent.toLowerCase();
+          const textB = b.querySelector(".phrase").textContent.toLowerCase();
+          return sortOrder === "asc" ? textA.localeCompare(textB) : textB.localeCompare(textA);
+        });
+
+        // 3. RENDER
+        resultsList.innerHTML = ""; 
+
+        if (filtered.length === 0 && allItems.length > 0) {
+          const notFoundLi = document.createElement("li");
+          notFoundLi.textContent = "Indeks tidak ditemukan.";
+          notFoundLi.className = "not-found"; 
+          resultsList.appendChild(notFoundLi);
+        } else if (allItems.length === 0) {
+           const notFoundLi = document.createElement("li");
+          notFoundLi.textContent = "Tidak ada frasa yang ditemukan.";
+          notFoundLi.className = "no-results-server"; 
+          resultsList.appendChild(notFoundLi);
+        } else {
+          // Perhatikan: Karena 'allItems' menyimpan referensi DOM node,
+          // status checkbox (checked/unchecked) akan TERSIMPAN saat di-append ulang.
+          filtered.forEach(li => resultsList.appendChild(li));
+        }
+      }
+
+      // --- Fungsi Modal ---
+      function openModal(mode, li = null) {
+          modalOverlay.dataset.mode = mode;
+          modalForm.reset(); 
+          
+          if (mode === 'edit') {
+              modalTitle.textContent = "Edit Indeks";
+              const phrase = li.querySelector(".phrase").textContent;
+              const pages = li.dataset.fullPages; 
+              
+              modalPhraseInput.value = phrase;
+              modalPagesInput.value = pages;
+              modalOverlay.dataset.editingId = li.dataset.id;
+              
+          } else if (mode === 'add') {
+              modalTitle.textContent = "Tambah Indeks";
+              delete modalOverlay.dataset.editingId;
+          }
+          
+          modalOverlay.style.display = 'flex'; 
+          modalPhraseInput.focus(); 
+      }
+      
+      function closeModal() {
+          modalOverlay.style.display = 'none'; 
+      }
+      
+      // --- Fungsi CRUD (Create, Read, Update, Delete) ---
+      
+      function createAndAddLi(phrase, pagesStr) {
+          const newId = nextId++;
+          const newLi = document.createElement("li");
+          newLi.dataset.id = newId;
+          newLi.dataset.fullPages = pagesStr;
+          
+          // Perhatikan penambahan checkbox di sini
+          newLi.innerHTML = `
+            <div class="index-content">
+              <input type="checkbox" class="check-item" />
+              <span class="phrase">${phrase}</span>
+              <span class="pages" title="Halaman: ${pagesStr}">
+                hlm. ${pagesStr}
+              </span>
+            </div>
+            <div class="actions">
+              <button class="btn-action btn-edit">Edit</button>
+              <button class="btn-action btn-delete">Hapus</button>
+            </div>
+          `;
+          
+          // Tambahkan ke cache
+          allItems.unshift(newLi);
+      }
+      
+      function handleSave(e) {
+          e.preventDefault(); 
+          
+          const mode = modalOverlay.dataset.mode;
+          const phrase = modalPhraseInput.value.trim();
+          const pagesStr = modalPagesInput.value.trim();
+          
+          if (!phrase) {
+              alert("Frasa (Indeks) tidak boleh kosong.");
+              return;
+          }
+          
+          if (mode === 'add') {
+              createAndAddLi(phrase, pagesStr || "?"); 
+              
+          } else if (mode === 'edit') {
+              const editingId = modalOverlay.dataset.editingId;
+              const liToUpdate = allItems.find(item => item.dataset.id == editingId);
+              
+              if (liToUpdate) {
+                  liToUpdate.querySelector(".phrase").textContent = phrase;
+                  liToUpdate.querySelector(".pages").textContent = `hlm. ${pagesStr}`;
+                  liToUpdate.querySelector(".pages").title = `Halaman: ${pagesStr}`;
+                  liToUpdate.dataset.fullPages = pagesStr;
+              }
+          }
+          
+          closeModal();
+          filterAndSort(); 
+      }
+
+      function handleDelete(li) {
+          if (confirm("Apakah Anda yakin ingin menghapus indeks ini?")) {
+              const idToDelete = li.dataset.id;
+              allItems = allItems.filter(item => item.dataset.id != idToDelete);
+              filterAndSort();
+          }
+      }
+
+      // --- LOGIKA BULK ACTION (Backend Integration) ---
+
+      // 1. Bulk Delete
+      if(btnBulkDelete) {
+        btnBulkDelete.addEventListener('click', () => {
+            const selectedLi = getCheckedItems();
+            if (selectedLi.length === 0) return alert('Tidak ada indeks yang dipilih untuk dihapus.');
+            
+            if (!confirm(`Apakah Anda yakin ingin menghapus ${selectedLi.length} item ini?`)) return;
+
+            // Ambil teks frasa
+            const phrasesToDelete = selectedLi.map(li => li.querySelector('.phrase').textContent.trim());
+
+            fetch('/api/bulk_delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phrases: phrasesToDelete })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Hapus dari cache 'allItems' berdasarkan ID elemen yang dipilih
+                    const idsToDelete = new Set(selectedLi.map(li => li.dataset.id));
+                    allItems = allItems.filter(item => !idsToDelete.has(item.dataset.id));
+                    
+                    alert(`Berhasil menghapus ${data.deleted_count} item.`);
+                    filterAndSort(); // Refresh tampilan
+                } else {
+                    alert('Gagal menghapus: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan koneksi.');
+            });
+        });
+      }
+
+      // 2. Bulk Download PDF
+      if(btnBulkDownload) {
+        btnBulkDownload.addEventListener('click', () => {
+            const selectedLi = getCheckedItems();
+            if (selectedLi.length === 0) return alert('Tidak ada indeks yang dipilih untuk didownload.');
+
+            const phrasesToDownload = selectedLi.map(li => li.querySelector('.phrase').textContent.trim());
+
+            const originalText = btnBulkDownload.innerText;
+            btnBulkDownload.innerText = "Memproses PDF...";
+            btnBulkDownload.disabled = true;
+
+            fetch('/api/download_selected_pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phrases: phrasesToDownload })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || 'Gagal generate PDF') });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `indeks_terpilih_${new Date().getTime()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Gagal mengunduh PDF: ' + err.message);
+            })
+            .finally(() => {
+                btnBulkDownload.innerText = originalText;
+                btnBulkDownload.disabled = false;
+            });
+        });
+      }
+
+      // --- Pencarian Halaman Otomatis (Modal) ---
+      async function handleSearchPhrase() {
+          const phrase = modalPhraseInput.value.trim();
+          if (!phrase) {
+              alert("Silakan masukkan frasa yang ingin dicari.");
+              return;
+          }
+          
+          modalLoading.style.display = 'inline';
+          modalSearchBtn.disabled = true;
+          
+          try {
+              const response = await fetch('/api/search_phrase', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ phrase: phrase }),
+              });
+              
+              const result = await response.json();
+              
+              if (response.ok && result.status === 'success') {
+                  modalPagesInput.value = result.pages.join(', ');
+              } else {
+                  modalPagesInput.value = result.message || 'Error tidak diketahui';
+              }
+              
+          } catch (error) {
+              console.error("Error fetching search:", error);
+              modalPagesInput.value = 'Gagal terhubung ke server.';
+          } finally {
+              modalLoading.style.display = 'none';
+              modalSearchBtn.disabled = false;
+          }
+      }
+
+      // --- Event Listeners ---
+      
+      // Listener untuk seluruh list (Delegasi event untuk Edit/Hapus per item)
+      resultsList.addEventListener("click", (e) => {
+          const target = e.target;
+          const li = target.closest("li");
+          if (!li) return;
+          
+          if (target.classList.contains("btn-edit")) {
+              openModal('edit', li);
+          }
+          
+          if (target.classList.contains("btn-delete")) {
+              // Jika user menghapus manual 1 item, kita tidak perlu panggil API bulk_delete,
+              // tapi idealnya kita sinkronkan dengan backend.
+              // Untuk simplisitas di sini, kita gunakan flow "Hapus Visual" saja
+              // atau Anda bisa menambahkan endpoint delete single di backend.
+              // Mengingat backend hanya punya "bulk_delete", kita bisa pakai itu untuk array 1 item.
+              
+              if (confirm("Apakah Anda yakin ingin menghapus indeks ini?")) {
+                  const phrase = li.querySelector('.phrase').textContent.trim();
+                  
+                  // Panggil API Bulk Delete untuk 1 item agar sesi backend tetap sinkron
+                  fetch('/api/bulk_delete', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ phrases: [phrase] })
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                      if(data.status === 'success') {
+                          const idToDelete = li.dataset.id;
+                          allItems = allItems.filter(item => item.dataset.id != idToDelete);
+                          filterAndSort();
+                      } else {
+                          alert("Gagal menghapus: " + data.message);
+                      }
+                  });
+              }
+          }
+      });
+      
+      btnAddIndex.addEventListener("click", () => openModal('add'));
+      searchInput.addEventListener("input", filterAndSort);
+      sortSelect.addEventListener("change", filterAndSort);
+      modalCloseBtn.addEventListener("click", closeModal);
+      modalCancelBtn.addEventListener("click", closeModal);
+      modalOverlay.addEventListener("click", (e) => {
+          if (e.target === modalOverlay) closeModal();
+      });
+      modalForm.addEventListener("submit", handleSave);
+      modalSearchBtn.addEventListener("click", handleSearchPhrase);
+
+      // --- Inisialisasi ---
+      initializeItems();
+      filterAndSort(); 
+
+    } 
+    
+  </script>
+</body>
+</html>

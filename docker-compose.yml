@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - FLASK_SECRET_KEY=dev-secret-key-change-in-production
+      - FASTTEXT_MODEL_PATH=/app/models/cc.id.300.bin
+    volumes:
+      - .:/app
+      - uploads:/app/uploads
+      - results:/app/results
+      - flask_session:/app/flask_session
+    command: flask run --host=0.0.0.0
+
+volumes:
+  uploads:
+  results:
+  flask_session:

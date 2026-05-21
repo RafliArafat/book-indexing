@@ -93,7 +93,7 @@ print("Memuat model FastText (mungkin perlu beberapa saat)...")
 # Download dari: https://fasttext.cc/docs/en/crawl-vectors.html
 # Untuk bahasa Inggris: cc.en.300.bin
 # Untuk bahasa Indonesia: cc.id.300.bin
-model_path_fasttext = r'C:\SKRIPSI (code)\models\cc.id.300.bin'
+model_path_fasttext = os.environ.get('FASTTEXT_MODEL_PATH', r'C:\SKRIPSI (code)\models\cc.id.300.bin')
 
 ft_model = None
 try:

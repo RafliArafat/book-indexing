@@ -3,7 +3,7 @@ Flask-Session==0.5.0
 pdfplumber==0.10.2
 pymupdf==1.23.8
 sastrawi==1.0.1
-nltk==3.8.1
+nltk==3.9.1
 yake==0.4.8
 rapidfuzz==3.4.0
 scipy==1.11.3

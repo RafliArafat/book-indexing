@@ -25,7 +25,7 @@ RUN mkdir -p uploads results flask_session
 EXPOSE 5000
 
 # Environment variables
-ENV FLASK_APP=auto_indexing.py
+ENV FLASK_APP=auto_indexing_v3.py
 ENV FLASK_ENV=production
 
 # Health check

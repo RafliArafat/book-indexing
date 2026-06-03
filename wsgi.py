@@ -4,7 +4,7 @@ Pastikan gunicorn menjalankan: gunicorn wsgi:app
 """
 import os
 import sys
-from auto_indexing import app
+from auto_indexing_v3 import app
 
 # Set production environment
 os.environ.setdefault('FLASK_ENV', 'production')

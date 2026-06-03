@@ -174,6 +174,11 @@ except LookupError:
     nltk.download('stopwords')
 
 try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
+try:
     nltk.data.find('tokenizers/punkt_tab')
 except LookupError:
     nltk.download('punkt_tab')
@@ -188,7 +193,8 @@ print("Memuat stemmer Sastrawi...")
 stemmer_factory_global = StemmerFactory()
 indonesian_stemmer = stemmer_factory_global.create_stemmer()
 
-FASTTEXT_PATH = r'C:\SKRIPSI (code)\models\cc.id.300.bin'
+# FASTTEXT_PATH = r'C:\SKRIPSI (code)\models\cc.id.300.bin'
+FASTTEXT_PATH = os.environ.get('FASTTEXT_MODEL_PATH', r'C:\SKRIPSI (code)\models\cc.id.300.bin')
 ft_model = None
 try:
     if os.path.exists(FASTTEXT_PATH):
@@ -899,7 +905,7 @@ def create_index_pdf(keyword_pages, pdf_path, book_title):
 @app.route('/')
 def index():
     return render_template(
-        'index.html',
+        'index_v3.html',
         keyword_pages=session.get('keyword_pages'),
         book_title=session.get('book_title'),
         download_file=session.get('download_file'),

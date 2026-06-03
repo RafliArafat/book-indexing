@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Indeks Buku Otomatis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #1a1a2e;
+      --ink-mid:    #3d3d5c;
+      --ink-soft:   #7b7b9a;
+      --paper:      #faf9f6;
+      --paper-warm: #f3f0e8;
+      --accent:     #c0392b;
+      --accent-2:   #e8c547;
+      --border:     #e2ddd5;
+      --success:    #2e7d52;
+      --radius:     8px;
+      --shadow:     0 2px 12px rgba(26,26,46,.08);
+      --shadow-lg:  0 8px 32px rgba(26,26,46,.14);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ── HEADER ─────────────────────────────────────── */
+    .site-header {
+      background: var(--ink);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .site-header .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--paper);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+
+    .logo-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      letter-spacing: .02em;
+      color: var(--paper);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.25);
+      color: rgba(255,255,255,.8);
+      padding: 7px 16px;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .2s;
+      text-decoration: none;
+    }
+    .btn-ghost:hover {
+      background: rgba(255,255,255,.1);
+      color: #fff;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────────── */
+    .page-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 20px 0;
+    }
+
+    .page-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+      color: var(--ink-soft);
+      font-size: .95rem;
+      margin-bottom: 36px;
+    }
+
+    /* ── FLASH MESSAGES ─────────────────────────────── */
+    .flash-wrap { margin-bottom: 24px; }
+
+    .flash {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: .9rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      border-left: 4px solid transparent;
+      animation: fadeSlide .3s ease;
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .flash.success { background: #e9f5ee; border-color: var(--success); color: #1b5e38; }
+    .flash.error   { background: #fdecea; border-color: var(--accent);   color: #7f1d1d; }
+    .flash.warning { background: #fef9e7; border-color: var(--accent-2); color: #6d5d00; }
+
+    /* ── CARD ───────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header .step-badge {
+      width: 26px; height: 26px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .card-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    .card-body { padding: 24px; }
+
+    /* ── FORM ───────────────────────────────────────── */
+    .field { margin-bottom: 20px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+      margin-bottom: 6px;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    .field input[type="text"],
+    .field input[type="file"],
+    .field textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      color: var(--ink);
+      background: var(--paper);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+
+    .field input[type="file"] {
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 3px rgba(26,26,46,.07);
+    }
+
+    .field textarea { resize: vertical; min-height: 70px; }
+
+    .field-hint {
+      font-size: .8rem;
+      color: var(--ink-soft);
+      margin-top: 5px;
+    }
+
+    /* ── BUTTONS ────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 22px;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all .18s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--ink);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--ink-mid); }
+
+    .btn-danger {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-danger:hover { background: #a93226; }
+
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-success:hover { background: #236040; }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--ink-mid);
+    }
+    .btn-outline:hover { border-color: var(--ink); color: var(--ink); background: var(--paper-warm); }
+
+    .btn-sm {
+      padding: 7px 13px;
+      font-size: .82rem;
+    }
+
+    .btn-icon {
+      padding: 7px 10px;
+      font-size: .82rem;
+    }
+
+    /* ── LOADING ────────────────────────────────────── */
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,46,.55);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    #loading-overlay.show { display: flex; }
+
+    .loading-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 32px 40px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-box p {
+      font-size: .95rem;
+      color: var(--ink-mid);
+      font-weight: 500;
+    }
+
+    .loading-box small {
+      display: block;
+      color: var(--ink-soft);
+      font-size: .8rem;
+      margin-top: 6px;
+    }
+
+    /* ── RESULTS TOOLBAR ────────────────────────────── */
+    .results-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .results-toolbar .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .results-toolbar .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-soft);
+      font-size: .9rem;
+      pointer-events: none;
+    }
+
+    .results-toolbar input[type="text"] {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .88rem;
+      background: var(--paper);
+      outline: none;
+      transition: border-color .2s;
+    }
+    .results-toolbar input:focus { border-color: var(--ink); }
+
+    .results-toolbar select {
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem;
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .toolbar-right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ── RESULTS LIST ───────────────────────────────── */
+    .results-list {
+      list-style: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      max-height: 440px;
+      overflow-y: auto;
+    }
+
+    .results-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-bottom: 1px solid #f0ede8;
+      background: #fff;
+      transition: background .15s;
+    }
+    .results-list li:last-child { border-bottom: none; }
+    .results-list li:hover { background: var(--paper); }
+    .results-list li.hidden { display: none; }
+
+    .results-list .row-cb {
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    .results-list .phrase {
+      flex: 1;
+      font-weight: 500;
+      font-size: .9rem;
+      color: var(--ink);
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .results-list .pages-badge {
+      font-size: .78rem;
+      color: var(--ink-soft);
+      background: var(--paper-warm);
+      padding: 3px 9px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: help;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .row-actions button {
+      padding: 4px 9px;
+      font-size: .78rem;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--ink-mid);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      transition: all .15s;
+    }
+    .row-actions button:hover { background: var(--paper-warm); border-color: #bbb; }
+    .row-actions .btn-del { border-color: #f5c6cb; color: var(--accent); background: #fdecea; }
+    .row-actions .btn-del:hover { background: #fbd4d7; }
+
+    .results-list .empty-row {
+      display: block;
+      text-align: center;
+      color: var(--ink-soft);
+      padding: 24px;
+      font-size: .9rem;
+    }
+
+    /* ── EVAL RESULTS ───────────────────────────────── */
+    .metric-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      flex: 1;
+      min-width: 100px;
+      background: var(--paper-warm);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    .metric-card .metric-val {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .metric-card .metric-label {
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--ink-soft);
+      margin-top: 4px;
+    }
+
+    .eval-detail {
+      margin-top: 16px;
+    }
+
+    .eval-detail summary {
+      cursor: pointer;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+      padding: 10px 14px;
+      background: var(--paper-warm);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .eval-detail summary::-webkit-details-marker { display: none; }
+    .eval-detail summary .toggle-icon { transition: transform .2s; margin-left: auto; }
+    details[open] summary .toggle-icon { transform: rotate(90deg); }
+
+    .eval-detail pre {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .83rem;
+      color: var(--ink-mid);
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    /* ── MODAL ──────────────────────────────────────── */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,46,.5);
+      z-index: 400;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+    }
+    .modal-bg.show { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      width: 94%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      animation: modalIn .22s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(.95) translateY(10px); }
+      to   { opacity: 1; transform: scale(1)  translateY(0); }
+    }
+
+    .modal h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: var(--ink);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 16px; right: 20px;
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      color: var(--ink-soft);
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-close-btn:hover { color: var(--ink); }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .search-inline {
+      display: flex;
+      gap: 8px;
+    }
+    .search-inline input { flex: 1; }
+
+    .search-status {
+      font-size: .8rem;
+      color: var(--ink-soft);
+      margin-top: 5px;
+      min-height: 18px;
+    }
+
+    /* ── SCROLLBAR ──────────────────────────────────── */
+    .results-list::-webkit-scrollbar { width: 5px; }
+    .results-list::-webkit-scrollbar-track { background: var(--paper); }
+    .results-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <a href="/" class="logo">
+    <div class="logo-icon">📚</div>
+    <span class="logo-text">IndeksBuku</span>
+  </a>
+  <div class="header-actions">
+    {% if keyword_pages %}
+    <a href="/download/{{ download_file }}" class="btn-ghost">↓ Unduh PDF</a>
+    {% endif %}
+    <a href="/clear" class="btn-ghost">Mulai Ulang</a>
+  </div>
+</header>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p>Memproses buku...</p>
+    <small>Summarization + YAKE + FastText. Mohon tunggu.</small>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <!-- PAGE TITLE -->
+  <h1 class="page-title">Indeks Buku Otomatis</h1>
+  <p class="page-subtitle">Upload PDF buku → sistem ekstrak kata kunci dan halaman secara otomatis.</p>
+
+  <!-- FLASH -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-wrap">
+    {% for cat, msg in messages %}
+    <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- ① UPLOAD FORM -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step-badge">1</div>
+      <h2>Buat Indeks Buku</h2>
+    </div>
+    <div class="card-body">
+      <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+
+        <div class="field">
+          <label for="book_title">Judul Buku <span style="color:var(--accent)">*</span></label>
+          <input type="text" id="book_title" name="book_title"
+                 placeholder="Contoh: Sistem Pendukung Keputusan"
+                 value="{{ book_title or '' }}" required />
+        </div>
+
+        <div class="field">
+          <label for="file_buku">File PDF Buku <span style="color:var(--accent)">*</span></label>
+          <input type="file" id="file_buku" name="file_buku" accept=".pdf" required />
+          <p class="field-hint">Ringkasan dibuat otomatis dari isi buku menggunakan LexRank.</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submit-btn" onclick="showLoading()">
+          Buat Indeks
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ② RESULTS -->
+  {% if keyword_pages %}
+  <div class="card" id="results-card">
+    <div class="card-header">
+      <div class="step-badge">2</div>
+      <h2>Hasil Indeks — <em style="font-style:italic;font-weight:300;">{{ book_title }}</em></h2>
+    </div>
+    <div class="card-body">
+
+      <!-- Toolbar -->
+      <div class="results-toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Cari frasa..." />
+        </div>
+        <select id="sortSelect">
+          <option value="asc">A → Z</option>
+          <option value="desc">Z → A</option>
+        </select>
+        <div class="toolbar-right">
+          <button class="btn btn-outline btn-sm" id="btn-add">＋ Tambah</button>
+          <button class="btn btn-danger btn-sm" id="btn-bulk-del">🗑 Hapus Terpilih</button>
+          <button class="btn btn-success btn-sm" id="btn-bulk-dl">↓ Unduh Terpilih</button>
+        </div>
+      </div>
+
+      <!-- List -->
+      <ul class="results-list" id="results-list">
+        {% for phrase, pages in keyword_pages.items() %}
+        <li data-phrase="{{ phrase }}" data-pages="{{ pages | join(',') }}">
+          <input type="checkbox" class="row-cb" />
+          <span class="phrase">{{ phrase }}</span>
+          <span class="pages-badge" title="Halaman: {{ pages | join(', ') }}">
+            hlm. {{ pages | join(', ') }}
+          </span>
+          <div class="row-actions">
+            <button class="btn-edit">✏ Edit</button>
+            <button class="btn-del">✕ Hapus</button>
+          </div>
+        </li>
+        {% else %}
+        <li><span class="empty-row">Tidak ada kata kunci ditemukan.</span></li>
+        {% endfor %}
+      </ul>
+
+    </div>
+  </div>
+
+  <!-- ③ EVALUASI -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step-badge">3</div>
+      <h2>Evaluasi F1-Score <span style="font-size:.82rem;color:var(--ink-soft);font-family:'DM Sans',sans-serif;">(Opsional)</span></h2>
+    </div>
+    <div class="card-body">
+      <p style="font-size:.88rem;color:var(--ink-soft);margin-bottom:18px;">
+        Upload PDF indeks yang sudah jadi sebagai ground truth untuk mengukur presisi dan recall.
+      </p>
+      <form action="/evaluasi" method="POST" enctype="multipart/form-data">
+        <div class="field">
+          <label for="file_gt">File Ground Truth (PDF) <span style="color:var(--accent)">*</span></label>
+          <input type="file" id="file_gt" name="file_gt" accept=".pdf" required />
+        </div>
+        <div class="field" style="display:flex;align-items:center;gap:10px;">
+          <input type="checkbox" id="use_fuzzy" name="use_fuzzy" value="true" checked
+                 style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0;" />
+          <label for="use_fuzzy" style="text-transform:none;font-size:.88rem;font-weight:400;margin:0;color:var(--ink-mid);">
+            Gunakan fuzzy matching (toleransi typo &amp; variasi penulisan)
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Jalankan Evaluasi</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ④ EVAL RESULTS -->
+  {% if eval_results %}
+  <div class="card">
+    <div class="card-header">
+      <div class="step-badge" style="background:var(--success);">4</div>
+      <h2>Hasil Evaluasi</h2>
+    </div>
+    <div class="card-body">
+      <div class="metric-row">
+        <div class="metric-card">
+          <div class="metric-val">{{ eval_results.precision }}</div>
+          <div class="metric-label">Precision</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">{{ eval_results.recall }}</div>
+          <div class="metric-label">Recall</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" style="color:var(--accent);">{{ eval_results.f1_score }}</div>
+          <div class="metric-label">F1-Score</div>
+        </div>
+        {% if eval_results.similarity %}
+        <div class="metric-card">
+          <div class="metric-val">{{ eval_results.similarity }}</div>
+          <div class="metric-label">FT Similarity</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="eval-detail">
+        <details>
+          <summary>
+            <span>✅ True Positives ({{ eval_results.true_positives | length }})</span>
+            <span class="toggle-icon">▶</span>
+          </summary>
+          <pre>{{ eval_results.true_positives | join('\n') or '—' }}</pre>
+        </details>
+        <details>
+          <summary>
+            <span>❌ False Positives ({{ eval_results.false_positives | length }})</span>
+            <span class="toggle-icon">▶</span>
+          </summary>
+          <pre>{{ eval_results.false_positives | join('\n') or '—' }}</pre>
+        </details>
+        <details>
+          <summary>
+            <span>⚠️ False Negatives ({{ eval_results.false_negatives | length }})</span>
+            <span class="toggle-icon">▶</span>
+          </summary>
+          <pre>{{ eval_results.false_negatives | join('\n') or '—' }}</pre>
+        </details>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div><!-- /.page-body -->
+
+<!-- EDIT / ADD MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <button class="modal-close-btn" id="modal-close">×</button>
+    <h3 id="modal-title">Edit Indeks</h3>
+
+    <div class="field">
+      <label for="modal-phrase">Frasa (Indeks)</label>
+      <div class="search-inline">
+        <input type="text" id="modal-phrase" placeholder="Contoh: fuzzy logic" />
+        <button class="btn btn-outline btn-sm" id="modal-search-btn">🔍 Cari</button>
+      </div>
+      <p class="search-status" id="search-status"></p>
+    </div>
+
+    <div class="field">
+      <label for="modal-pages">Halaman</label>
+      <input type="text" id="modal-pages" placeholder="Contoh: 10, 25, 37" />
+      <p class="field-hint">Pisahkan dengan koma. Kosongkan jika tidak ada.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" id="modal-cancel">Batal</button>
+      <button class="btn btn-primary btn-sm" id="modal-save">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════
+function showLoading() {
+  document.getElementById('loading-overlay').classList.add('show');
+}
+
+// ═══════════════════════════════════════════════════════
+// SEARCH & SORT
+// ═══════════════════════════════════════════════════════
+const searchInput = document.getElementById('searchInput');
+const sortSelect  = document.getElementById('sortSelect');
+
+function applyFilter() {
+  const q    = (searchInput ? searchInput.value : '').toLowerCase();
+  const sort = sortSelect ? sortSelect.value : 'asc';
+  const list = document.getElementById('results-list');
+  if (!list) return;
+
+  const items = Array.from(list.querySelectorAll('li[data-phrase]'));
+
+  // Filter
+  items.forEach(li => {
+    const phrase = li.dataset.phrase.toLowerCase();
+    li.classList.toggle('hidden', q !== '' && !phrase.includes(q));
+  });
+
+  // Sort
+  const visible = items.filter(li => !li.classList.contains('hidden'));
+  visible.sort((a, b) => {
+    const pa = a.dataset.phrase.toLowerCase();
+    const pb = b.dataset.phrase.toLowerCase();
+    return sort === 'asc' ? pa.localeCompare(pb) : pb.localeCompare(pa);
+  });
+  visible.forEach(li => list.appendChild(li));
+}
+
+if (searchInput) searchInput.addEventListener('input', applyFilter);
+if (sortSelect)  sortSelect.addEventListener('change', applyFilter);
+
+// ═══════════════════════════════════════════════════════
+// INLINE DELETE (single row)
+// ═══════════════════════════════════════════════════════
+document.getElementById('results-list') &&
+document.getElementById('results-list').addEventListener('click', async function(e) {
+  const li = e.target.closest('li[data-phrase]');
+  if (!li) return;
+
+  if (e.target.classList.contains('btn-del')) {
+    const phrase = li.dataset.phrase;
+    if (!confirm(`Hapus "${phrase}"?`)) return;
+    const res = await fetch('/api/bulk_delete', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ phrases: [phrase] })
+    });
+    if ((await res.json()).status === 'success') li.remove();
+  }
+
+  if (e.target.classList.contains('btn-edit')) {
+    openEditModal(li);
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// BULK ACTIONS
+// ═══════════════════════════════════════════════════════
+function getCheckedPhrases() {
+  return Array.from(document.querySelectorAll('#results-list li[data-phrase]'))
+    .filter(li => li.querySelector('.row-cb')?.checked)
+    .map(li => li.dataset.phrase);
+}
+
+const btnBulkDel = document.getElementById('btn-bulk-del');
+if (btnBulkDel) {
+  btnBulkDel.addEventListener('click', async () => {
+    const phrases = getCheckedPhrases();
+    if (!phrases.length) { alert('Pilih setidaknya satu entri.'); return; }
+    if (!confirm(`Hapus ${phrases.length} entri terpilih?`)) return;
+
+    const res = await fetch('/api/bulk_delete', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ phrases })
+    });
+    if ((await res.json()).status === 'success') {
+      phrases.forEach(p => {
+        const li = document.querySelector(`#results-list li[data-phrase="${CSS.escape(p)}"]`);
+        if (li) li.remove();
+      });
+    }
+  });
+}
+
+const btnBulkDl = document.getElementById('btn-bulk-dl');
+if (btnBulkDl) {
+  btnBulkDl.addEventListener('click', async () => {
+    const phrases = getCheckedPhrases();
+    if (!phrases.length) { alert('Pilih setidaknya satu entri.'); return; }
+
+    const res = await fetch('/api/download_selected_pdf', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ phrases })
+    });
+
+    if (!res.ok) { alert('Gagal membuat PDF.'); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'indeks_terpilih.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL — EDIT & ADD
+// ═══════════════════════════════════════════════════════
+const modalBg     = document.getElementById('modal-bg');
+const modalTitle  = document.getElementById('modal-title');
+const modalPhrase = document.getElementById('modal-phrase');
+const modalPages  = document.getElementById('modal-pages');
+const searchStat  = document.getElementById('search-status');
+
+let editingLi = null;   // li DOM element currently being edited
+
+function openModal(title, phrase = '', pages = '') {
+  modalTitle.textContent  = title;
+  modalPhrase.value       = phrase;
+  modalPages.value        = pages;
+  searchStat.textContent  = '';
+  modalPhrase.readOnly    = !!phrase; // lock phrase when editing
+  modalBg.classList.add('show');
+  modalPhrase.focus();
+}
+
+function openEditModal(li) {
+  editingLi = li;
+  const phrase = li.dataset.phrase;
+  const pages  = li.dataset.pages;
+  openModal('Edit Indeks', phrase, pages);
+}
+
+function closeModal() {
+  modalBg.classList.remove('show');
+  editingLi = null;
+  modalPhrase.readOnly = false;
+}
+
+document.getElementById('btn-add') &&
+document.getElementById('btn-add').addEventListener('click', () => {
+  editingLi = null;
+  openModal('Tambah Indeks');
+});
+
+document.getElementById('modal-close').addEventListener('click',  closeModal);
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+modalBg.addEventListener('click', e => { if (e.target === modalBg) closeModal(); });
+
+// Cari halaman via API
+document.getElementById('modal-search-btn').addEventListener('click', async () => {
+  const phrase = modalPhrase.value.trim();
+  if (!phrase) { searchStat.textContent = 'Masukkan frasa terlebih dahulu.'; return; }
+  searchStat.textContent = 'Mencari...';
+
+  try {
+    const res  = await fetch('/api/search_phrase', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ phrase })
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      modalPages.value       = data.pages.join(', ');
+      searchStat.textContent = `Ditemukan di ${data.pages.length} halaman.`;
+    } else {
+      searchStat.textContent = data.message || 'Tidak ditemukan.';
+    }
+  } catch {
+    searchStat.textContent = 'Gagal menghubungi server.';
+  }
+});
+
+// Simpan
+document.getElementById('modal-save').addEventListener('click', () => {
+  const phrase = modalPhrase.value.trim();
+  const pages  = modalPages.value.trim()
+    .split(',')
+    .map(p => p.trim())
+    .filter(p => p !== '');
+
+  if (!phrase) { alert('Frasa tidak boleh kosong.'); return; }
+
+  const list = document.getElementById('results-list');
+
+  if (editingLi) {
+    // Update existing row
+    editingLi.dataset.phrase = phrase;
+    editingLi.dataset.pages  = pages.join(',');
+    editingLi.querySelector('.phrase').textContent        = phrase;
+    editingLi.querySelector('.pages-badge').textContent  = pages.length ? `hlm. ${pages.join(', ')}` : '—';
+    editingLi.querySelector('.pages-badge').title        = `Halaman: ${pages.join(', ')}`;
+  } else {
+    // Add new row
+    if (document.querySelector(`#results-list li[data-phrase="${phrase}"]`)) {
+      alert('Frasa sudah ada di daftar.'); return;
+    }
+    const li = document.createElement('li');
+    li.dataset.phrase = phrase;
+    li.dataset.pages  = pages.join(',');
+    li.innerHTML = `
+      <input type="checkbox" class="row-cb" />
+      <span class="phrase">${phrase}</span>
+      <span class="pages-badge" title="Halaman: ${pages.join(', ')}">
+        ${pages.length ? 'hlm. ' + pages.join(', ') : '—'}
+      </span>
+      <div class="row-actions">
+        <button class="btn-edit">✏ Edit</button>
+        <button class="btn-del">✕ Hapus</button>
+      </div>
+    `;
+
+    // Remove empty placeholder if present
+    const empty = list.querySelector('.empty-row');
+    if (empty) empty.closest('li').remove();
+    list.appendChild(li);
+  }
+
+  closeModal();
+});
+</script>
+</body>
+</html>

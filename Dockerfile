@@ -15,6 +15,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir gunicorn
 
+# Pre-download NLTK resources to avoid runtime import order crashes
+RUN python -m nltk.downloader stopwords punkt punkt_tab
+
 # Copy aplikasi
 COPY . .
 

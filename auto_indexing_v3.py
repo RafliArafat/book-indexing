@@ -30,7 +30,7 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lex_rank import LexRankSummarizer
 
 # --- PDF Output ---
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, BaseDocTemplate, Frame, PageTemplate, FrameBreak, NextPageTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
@@ -867,35 +867,130 @@ def evaluasi_indeks(gt_path, matched_keywords, ft_model=None, use_fuzzy=True):
 # =============================================================================
 
 def create_index_pdf(keyword_pages, pdf_path, book_title):
-    doc = SimpleDocTemplate(pdf_path, pagesize=A4)
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'Title', parent=styles['Heading1'],
-        fontSize=14, textColor=colors.HexColor('#1a1a1a'),
-        spaceAfter=20, alignment=TA_CENTER
-    )
-    story = [
-        Paragraph(f"Indeks Buku: {book_title}", title_style),
-        Spacer(1, 12)
-    ]
-    data = [["Kata Kunci", "Halaman"]]
-    for kw in sorted(keyword_pages.keys()):
-        data.append([kw, ", ".join(map(str, keyword_pages[kw]))])
+    """
+    Membuat PDF indeks buku dengan layout dua kolom bergaya indeks buku sungguhan.
+    Entri dikelompokkan per huruf awal, tanpa tabel.
+    """
+    from reportlab.lib.units import cm
 
-    table = Table(data, colWidths=[300, 200])
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 11),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-    ]))
-    story.append(table)
+    PAGE_W, PAGE_H = A4
+    MARGIN_TOP    = 2.2 * cm
+    MARGIN_BOTTOM = 2.0 * cm
+    MARGIN_LEFT   = 2.2 * cm
+    MARGIN_RIGHT  = 2.0 * cm
+    COL_GAP       = 0.8 * cm
+
+    col_w   = (PAGE_W - MARGIN_LEFT - MARGIN_RIGHT - COL_GAP) / 2
+
+    # Tinggi frame judul: 4 cm agar cukup untuk judul buku panjang sekalipun
+    TITLE_H = 4.0 * cm
+
+    # Tinggi kolom konten halaman pertama (di bawah judul)
+    first_col_h = PAGE_H - MARGIN_TOP - MARGIN_BOTTOM - TITLE_H - 0.3 * cm
+
+    # ── Gaya teks ─────────────────────────────────────────────────────────
+    title_style = ParagraphStyle(
+        'IndexTitle', fontName='Helvetica-Bold', fontSize=13, leading=18,
+        alignment=TA_CENTER, spaceAfter=4, textColor=colors.HexColor('#1a1a1a'),
+    )
+    subtitle_style = ParagraphStyle(
+        'IndexSubtitle', fontName='Helvetica-Bold', fontSize=11, leading=15,
+        alignment=TA_CENTER, spaceAfter=6, textColor=colors.HexColor('#1a1a1a'),
+    )
+    letter_style = ParagraphStyle(
+        'LetterHeader', fontName='Helvetica-Bold', fontSize=12, leading=16,
+        spaceBefore=8, spaceAfter=3, textColor=colors.HexColor('#1a1a1a'),
+    )
+    entry_style = ParagraphStyle(
+        'IndexEntry', fontName='Helvetica', fontSize=9, leading=13,
+        leftIndent=0, rightIndent=0, spaceAfter=0,
+    )
+
+    # ── Kelompokkan entri per huruf ────────────────────────────────────────
+    grouped = {}
+    for kw in sorted(keyword_pages.keys(), key=lambda x: x.lower()):
+        letter = kw[0].upper() if kw else '#'
+        if not letter.isalpha():
+            letter = '#'
+        grouped.setdefault(letter, []).append(kw)
+
+    # ── Definisi frame ─────────────────────────────────────────────────────
+    # Halaman pertama: frame judul (atas) + 2 kolom konten (bawah)
+    frame_title = Frame(
+        MARGIN_LEFT, PAGE_H - MARGIN_TOP - TITLE_H,
+        PAGE_W - MARGIN_LEFT - MARGIN_RIGHT, TITLE_H,
+        id='title_frame', showBoundary=0,
+    )
+    frame1_col1 = Frame(
+        MARGIN_LEFT, MARGIN_BOTTOM,
+        col_w, first_col_h,
+        id='p1col1', showBoundary=0,
+    )
+    frame1_col2 = Frame(
+        MARGIN_LEFT + col_w + COL_GAP, MARGIN_BOTTOM,
+        col_w, first_col_h,
+        id='p1col2', showBoundary=0,
+    )
+    # Halaman berikutnya: 2 kolom penuh
+    full_col_h = PAGE_H - MARGIN_TOP - MARGIN_BOTTOM
+    frame2_col1 = Frame(
+        MARGIN_LEFT, MARGIN_BOTTOM,
+        col_w, full_col_h,
+        id='p2col1', showBoundary=0,
+    )
+    frame2_col2 = Frame(
+        MARGIN_LEFT + col_w + COL_GAP, MARGIN_BOTTOM,
+        col_w, full_col_h,
+        id='p2col2', showBoundary=0,
+    )
+
+    # ── Build dokumen ──────────────────────────────────────────────────────
+    doc = BaseDocTemplate(
+        pdf_path, pagesize=A4,
+        leftMargin=MARGIN_LEFT, rightMargin=MARGIN_RIGHT,
+        topMargin=MARGIN_TOP, bottomMargin=MARGIN_BOTTOM,
+    )
+
+    def add_page_number(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.setFillColor(colors.HexColor('#888888'))
+        canvas.drawCentredString(PAGE_W / 2, 1.2 * cm, str(doc.page))
+        canvas.restoreState()
+
+    pt_first = PageTemplate(
+        id='First',
+        frames=[frame_title, frame1_col1, frame1_col2],
+        onPage=add_page_number,
+    )
+    pt_later = PageTemplate(
+        id='Later',
+        frames=[frame2_col1, frame2_col2],
+        onPage=add_page_number,
+    )
+    doc.addPageTemplates([pt_first, pt_later])
+
+    story = []
+    # Judul masuk ke frame_title
+    story.append(Paragraph("Indeks Buku Otomatis", title_style))
+    story.append(Paragraph(book_title.upper(), subtitle_style))
+    story.append(FrameBreak())          # pindah ke frame1_col1 (konten)
+    story.append(NextPageTemplate('Later'))
+
+    # Isi indeks per huruf
+    for letter in sorted(grouped.keys()):
+        story.append(Paragraph(letter, letter_style))
+        for kw in grouped[letter]:
+            pages_str = ", ".join(map(str, keyword_pages[kw]))
+            entry_text = (
+                f'<font name="Helvetica">{kw}</font>'
+                f'  <font name="Helvetica" color="#888888">hlm.</font>'
+                f' <font name="Helvetica">{pages_str}</font>'
+            )
+            story.append(Paragraph(entry_text, entry_style))
+
     doc.build(story)
-    print(f"PDF indeks dibuat: {pdf_path}")
+    print(f"PDF indeks (book-style) dibuat: {pdf_path}")
 
 
 # =============================================================================

@@ -25,7 +25,7 @@ COPY . .
 RUN mkdir -p uploads results flask_session
 
 # Expose port
-EXPOSE 5000
+EXPOSE 7860
 
 # Environment variables
 ENV FLASK_APP=auto_indexing_v3.py
@@ -33,7 +33,7 @@ ENV FLASK_ENV=production
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-5000}/ || exit 1
+    CMD curl -f http://localhost:${PORT:-7860}/ || exit 1
 
 # Run aplikasi dengan gunicorn
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120 wsgi:app"]
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-7860} --workers 2 --timeout 120 wsgi:app"]

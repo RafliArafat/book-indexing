@@ -1,3 +1,5 @@
+print("AUTO_INDEXING_V3 BERHASIL DIIMPORT")
+
 import os
 import re
 import math
